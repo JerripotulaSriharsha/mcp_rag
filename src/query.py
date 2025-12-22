@@ -1,18 +1,22 @@
 import chromadb
 from dotenv import load_dotenv
+from mcp.server.fastmcp import FastMCP
+import pprint
 load_dotenv()
 PERSISTENT_DIR = "./chroma_db"
 COLLECTION_NAME = "rag_mcp"
 
-chroma_client = chromadb.PersistentClient(path=PERSISTENT_DIR)
-collection = chroma_client.get_collection(name=COLLECTION_NAME)
+mcp  = FastMCP("mcp rag server")
 
-res = collection.query(
-    query_texts=["PhysX-Anything?"],
-    n_results=2
-)
+@mcp.tool()
+def query_chroma(query_text: str, n_results: int = 2):
+    chroma_client = chromadb.PersistentClient(path=PERSISTENT_DIR)
+    collection = chroma_client.get_collection(name=COLLECTION_NAME)
 
-print(res)                       # <-- this prints the full output dict
-print(res["documents"][0])       # <-- just the retrieved texts
-print(res["metadatas"][0])       # <-- metadata
-print(res["distances"][0])       # <-- similarity distances
+    return collection.query(
+        query_texts=[query_text],
+        n_results=n_results
+    )
+
+
+
