@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import contextlib
+
 from src.query import mcp as raw_mcp_server
 
 @contextlib.asynccontextmanager
@@ -13,13 +14,12 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # In production, specify your actual origins
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
-
-app.mount("/rag", raw_mcp_server.streamable_http_app())
+app.mount("/", raw_mcp_server.streamable_http_app())
 
 if __name__ == "__main__":
     import uvicorn
