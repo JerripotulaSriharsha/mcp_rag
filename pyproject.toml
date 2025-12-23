@@ -13,5 +13,7 @@ dependencies = [
   "python-dotenv>=1.2.1",
   "fastmcp>=2.14.1",
   "fastapi>=0.127.0",
+  "gunicorn>=22.0.0",
+  "uvicorn[standard]>=0.30.0",
 ]
 

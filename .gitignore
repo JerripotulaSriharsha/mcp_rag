@@ -22,3 +22,4 @@ coverage.xml
 
 # Local secrets
 .env
+chromadb
