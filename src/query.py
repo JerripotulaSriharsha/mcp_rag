@@ -5,24 +5,29 @@ from mcp.server.transport_security import TransportSecuritySettings
 from openai import OpenAI
 from qdrant_client import QdrantClient
 import os
+load_dotenv()
 
-RENDER_HOST = "mcp-rag-f6ev.onrender.com"
 COLLECTION_NAME = "rag_mcp"
 
-load_dotenv()
+render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")  
+
+allowed = [
+    "localhost:*",
+    "127.0.0.1:*",
+    "0.0.0.0:*",
+]
+
+if render_host:
+    allowed += [render_host, f"{render_host}:*"]
 
 mcp = FastMCP(
     "mcp rag server",
     transport_security=TransportSecuritySettings(
         enable_dns_rebinding_protection=True,
-        allowed_hosts=[
-            "localhost:*",
-            "127.0.0.1:*",
-            RENDER_HOST,
-            f"{RENDER_HOST}:*",
-        ],
+        allowed_hosts=allowed,
     ),
 )
+
 
 @mcp.tool()
 def query_qdrant(query_text: str, n_results: int = 3):
