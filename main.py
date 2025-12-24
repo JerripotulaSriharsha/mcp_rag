@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import contextlib
 import os
-
 from src.query import mcp as raw_mcp_server
 
 @contextlib.asynccontextmanager
