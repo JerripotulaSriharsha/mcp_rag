@@ -30,7 +30,7 @@ mcp = FastMCP(
 
 
 @mcp.tool()
-def query_qdrant(query_text: str, n_results: int = 3):
+def query_qdrant(query_text: str):
     # 1) embed the query
     openai_client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
     embedding = openai_client.embeddings.create(
@@ -47,7 +47,7 @@ def query_qdrant(query_text: str, n_results: int = 3):
     resp = qdrant.query_points(
         collection_name=COLLECTION_NAME,
         query=embedding,          # <-- dense vector
-        limit=n_results,
+        limit=10,
         with_payload=True,
     )
 

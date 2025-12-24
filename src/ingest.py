@@ -11,9 +11,7 @@ from qdrant_client.http import models as qm
 
 import tiktoken
 
-# --------------------------------------------------
-# ENV
-# --------------------------------------------------
+
 load_dotenv()
 
 DATA_DIR = r"D:\Narwal\mcp_rag\data"
@@ -23,9 +21,7 @@ OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 QDRANT_URL = os.environ["QDRANT_URL"]
 QDRANT_API_KEY = os.environ["QDRANT_API_KEY"]
 
-# --------------------------------------------------
-# CLIENTS
-# --------------------------------------------------
+
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 qdrant = QdrantClient(
@@ -33,9 +29,7 @@ qdrant = QdrantClient(
     api_key=QDRANT_API_KEY,
 )
 
-# --------------------------------------------------
-# TOKENIZER (OpenAI compatible)
-# --------------------------------------------------
+
 tokenizer = tiktoken.get_encoding("cl100k_base")
 
 TOKEN_SIZE = 1000
@@ -52,9 +46,7 @@ def chunk_by_tokens(text):
 
     return chunks
 
-# --------------------------------------------------
-# CREATE COLLECTION (ONCE)
-# --------------------------------------------------
+
 def ensure_collection():
     existing = [c.name for c in qdrant.get_collections().collections]
 
@@ -67,9 +59,7 @@ def ensure_collection():
             ),
         )
 
-# --------------------------------------------------
-# INGEST
-# --------------------------------------------------
+
 def ingest_data_dir():
     ensure_collection()
 
@@ -111,6 +101,5 @@ def ingest_data_dir():
 
     print("Ingestion complete.")
 
-# --------------------------------------------------
 if __name__ == "__main__":
     ingest_data_dir()
