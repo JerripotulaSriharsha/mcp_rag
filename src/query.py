@@ -6,7 +6,7 @@ from openai import OpenAI
 from qdrant_client import QdrantClient
 import os
 
-RENDER_HOST = "mcp-rag-6fz6.onrender.com"
+RENDER_HOST = "mcp-rag-ufkr.onrender.com"
 COLLECTION_NAME = "rag_mcp"
 
 load_dotenv()
