@@ -18,7 +18,6 @@ mcp = FastMCP(
         allowed_hosts=[
             "localhost:*",
             "127.0.0.1:*",
-            "0.0.0.0:*",
             RENDER_HOST,
             f"{RENDER_HOST}:*",
         ],
