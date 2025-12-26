@@ -16,5 +16,10 @@ dependencies = [
   "gunicorn>=22.0.0",
   "uvicorn[standard]>=0.30.0",
   "qdrant-client>=1.16.2",
+  "faiss-cpu>=1.13.2",
+  "datasets>=4.4.2",
+  "ipykernel>=7.1.0",
+  "transformers>=4.57.3",
+  "torch>=2.9.1",
 ]
 
