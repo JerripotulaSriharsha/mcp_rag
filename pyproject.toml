@@ -21,5 +21,6 @@ dependencies = [
   "ipykernel>=7.1.0",
   "transformers>=4.57.3",
   "torch>=2.9.1",
+  "chunking-evaluation @ git+https://github.com/brandonstarxel/chunking_evaluation.git"
 ]
 
