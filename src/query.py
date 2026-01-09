@@ -9,12 +9,14 @@ load_dotenv()
 
 COLLECTION_NAME = "rag_mcp"
 
-render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")  
+render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
 allowed = [
     "localhost:*",
     "127.0.0.1:*",
     "0.0.0.0:*",
+    "mcp-rag-g6a1.onrender.com",
+    "mcp-rag-g6a1.onrender.com:*",
 ]
 
 if render_host:
