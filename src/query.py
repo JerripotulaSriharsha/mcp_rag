@@ -25,8 +25,7 @@ if render_host:
 mcp = FastMCP(
     "mcp rag server",
     transport_security=TransportSecuritySettings(
-        enable_dns_rebinding_protection=True,
-        allowed_hosts=allowed,
+        enable_dns_rebinding_protection=False,
     ),
 )
 
