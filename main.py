@@ -1,14 +1,13 @@
 # main.py
-import contextlib
-import os
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
+import contextlib
+import os
 
 from src.query import mcp as raw_mcp_server
-from src.query import query_qdrant  # <-- your tool function
+from src.query import query_qdrant  # your RAG function
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,96 +19,72 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # lock down later if you want
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# -----------------------
-# 1) User-facing REST API
-# -----------------------
+# ------------------------
+# NORMAL HTTP ENDPOINT FOR UI
+# ------------------------
 class AskBody(BaseModel):
     question: str
 
 @app.post("/ask")
 def ask(body: AskBody):
     try:
-        answer = query_qdrant(body.question)  # calls your RAG tool directly
-        return {"answer": answer}
+        return {"answer": query_qdrant(body.question)}
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-# -----------------------
-# 2) Simple frontend page
-# -----------------------
-@app.get("/", response_class=HTMLResponse)
-def home():
+# ------------------------
+# SIMPLE CHAT UI (NOT ROOT)
+# ------------------------
+@app.get("/ui", response_class=HTMLResponse)
+def ui():
     return """
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8"/>
-    <title>RAG Chat</title>
-    <style>
-      body { font-family: Arial, sans-serif; max-width: 900px; margin: 30px auto; }
-      textarea { width: 100%; height: 80px; padding: 10px; }
-      button { padding: 10px 16px; margin-top: 10px; cursor: pointer; }
-      pre { background: #0b0b0b; color: #00ff7f; padding: 16px; white-space: pre-wrap; border-radius: 10px; }
-      .row { display:flex; gap:10px; align-items:center; }
-      .muted { color:#666; font-size: 12px; }
-    </style>
-  </head>
-  <body>
-    <h2>RAG Q&A</h2>
-    <textarea id="q" placeholder="Ask a question..."></textarea>
-    <div class="row">
-      <button id="btn">Ask</button>
-      <span id="status" class="muted"></span>
-    </div>
-    <h3>Answer</h3>
-    <pre id="a"></pre>
+<head>
+  <title>RAG Chat</title>
+  <style>
+    body { font-family: Arial; max-width: 800px; margin: 40px auto; }
+    textarea { width: 100%; height: 80px; }
+    button { padding: 8px 16px; margin-top: 8px; }
+    pre { background: #111; color: #0f0; padding: 12px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h2>Chat with RAG</h2>
 
-    <script>
-      const btn = document.getElementById("btn");
-      const q = document.getElementById("q");
-      const a = document.getElementById("a");
-      const status = document.getElementById("status");
+  <textarea id="q" placeholder="Ask a question..."></textarea>
+  <button onclick="ask()">Ask</button>
 
-      btn.onclick = async () => {
-        a.textContent = "";
-        status.textContent = "Thinking...";
-        btn.disabled = true;
+  <h3>Answer</h3>
+  <pre id="a"></pre>
 
-        try {
-          const res = await fetch("/ask", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ question: q.value })
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.error || "Request failed");
-          a.textContent = data.answer;
-          status.textContent = "";
-        } catch (e) {
-          status.textContent = "Error";
-          a.textContent = String(e);
-        } finally {
-          btn.disabled = false;
-        }
-      };
-    </script>
-  </body>
+  <script>
+    async function ask() {
+      const question = document.getElementById("q").value;
+      const res = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json();
+      document.getElementById("a").textContent = data.answer || data.error;
+    }
+  </script>
+</body>
 </html>
 """
 
-# -----------------------
-# 3) MCP endpoint for tools (Inspector/Cursor)
-# -----------------------
-# IMPORTANT: mount MCP app at /mcp (not "/") so your / and /ask routes work
-app.mount("/mcp", raw_mcp_server.streamable_http_app())
+# ------------------------
+# MCP OWNS ROOT (AS YOU REQUIRE)
+# ------------------------
+app.mount("/", raw_mcp_server.streamable_http_app())
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", "10000"))
-    uvicorn.run(app, host="0.0.0.0", port=port, log_level="debug")
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 10000)))
